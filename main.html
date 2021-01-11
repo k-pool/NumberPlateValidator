@@ -1,0 +1,176 @@
+<html>
+<head>
+	<title>NSW Number Plate Validator</title>
+	<style>
+		.wrapper {
+			width: 750px;
+			margin: auto;
+		}
+		.numberplateCharContainer {
+			width: 120px;
+			display: inline-block;
+		}
+		.numberplateChar {
+			display: block;
+			width: 120px;
+			height: 60px;
+			margin: 5px 5px 5px 5px;
+			font-size: 36px;
+			font-weight: bold;
+			text-transform: uppercase;
+		}
+		#btnValidate {
+			width: calc(100% - 10px);
+			margin: 0px 0px 2.5px 0px;
+		}
+		#btnClear {
+			width: calc(100% - 10px);
+			margin: 2.5px 0px 0px 0px;
+		}
+		#inputNumberPlate {
+			text-transform: uppercase;
+			width: 200px;
+			font-size: 30px;
+			margin: auto;
+			font-family: Prompt-Medium,Arial,Helvetica,sans-serif;
+		}
+	</style>
+</head>
+<body>
+	<h1 style="text-align: center">NSW Number Plate Validator</h1>
+	<div class="wrapper">
+		<div>
+			<p>Enter the number plate you want in the box below, then add any substitutions you're ok with in the substitutions row (e.g. substitute &quot;E&quot; for &quot;3&quot;) and press validate. The cheapest plates (&quot;Personalised formats&quot;) are shown first, then all possible combinations (&quot;Custom formats&tuot;). </p>
+			<p>Check the &quot;Use common substitutions&quot; box to pre-populate with common substitutions (e.g. &quot;O&quot; and &quot;0&quot;, &quot;S&quot; and &quot;5&quot; etc.)</p>
+			<p>Currently only 6-character plate templates are supported.</p>
+		</div>
+		<div style="display:grid; width: 100%; align-content: center">
+			<input id="inputNumberPlate">
+			<span style="width: 300px; margin: auto"><input id="inputUseCommonSubstitutions" type="checkbox" checked=true><label for="inputUseCommonSubstitutions">Use common substitutions</label></span>
+		</div>
+		<div>
+			<div class="numberplateCharContainer" style="margin-left: -130px; vertical-align: top;">
+				<div style="display: flex; flex-direction: column; justify-content: right; align-items: center; padding: 5px">
+					<div style="height: 60px; width: 120px; display: flex; align-items: center; justify-content: right">Letter:</div>
+					<div style="height: 60px; width: 120px; display: flex; align-items: center; justify-content: right">Substitutions:</div>
+				</div>
+			</div>
+			<div class="numberplateCharContainer">
+				<input class="numberplateChar" id="char0">
+				<input class="numberplateChar" id="sub0">
+			</div>
+			<div class="numberplateCharContainer">
+				<input class="numberplateChar" id="char1">
+				<input class="numberplateChar" id="sub1">
+			</div>
+			<div class="numberplateCharContainer">
+				<input class="numberplateChar" id="char2">
+				<input class="numberplateChar" id="sub2">
+			</div>
+			<div class="numberplateCharContainer">
+				<input class="numberplateChar" id="char3">
+				<input class="numberplateChar" id="sub3">
+			</div>
+			<div class="numberplateCharContainer">
+				<input class="numberplateChar" id="char4">
+				<input class="numberplateChar" id="sub4">
+			</div>
+			<div class="numberplateCharContainer">
+				<input class="numberplateChar" id="char5">
+				<input class="numberplateChar" id="sub5">
+			</div>
+		</div>
+		<button id="btnValidate">Validate</button>
+		<button id="btnClear">Clear</button>
+		<div id="result"></div>
+	</div>
+
+	<script>
+		const cartesian = (...a) => a.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
+
+		// function unique(a) {
+		//     var seen = {};
+		//     return a.filter(function(item) {
+		//         return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+		//     });
+		// }
+
+		for (i=0; i<6; i++) {
+			document.querySelector("#char" + i).disabled = true;
+		}
+
+		inputNumberPlate = document.querySelector("#inputNumberPlate");
+		inputUseCommonSubstitutions = document.querySelector("#inputUseCommonSubstitutions");
+
+		inputNumberPlate.addEventListener("input", () => {
+			var currentPlate = inputNumberPlate.value.split("");
+			for (i in currentPlate) {
+				if (i < 6) {
+					document.querySelector("#char" + i).value = currentPlate[i].toUpperCase();
+					if (inputUseCommonSubstitutions.checked && document.querySelector("#sub" + i).value === "") {
+						switch (currentPlate[i].toUpperCase()) {
+							case "I" : document.querySelector("#sub" + i).value += "1"; break;
+							case "Z" : document.querySelector("#sub" + i).value += "2"; break;
+							case "A" : document.querySelector("#sub" + i).value += "4"; break;
+							case "Y" : document.querySelector("#sub" + i).value += "7"; break;
+							case "R" : document.querySelector("#sub" + i).value += "7"; break;
+							case "G" : document.querySelector("#sub" + i).value += "9"; break;
+							case "T" : document.querySelector("#sub" + i).value += "7"; break;
+							case "B" : document.querySelector("#sub" + i).value += "8"; break;
+							case "E" : document.querySelector("#sub" + i).value += "3"; break;
+							case "O" : document.querySelector("#sub" + i).value += "0"; break;
+
+							case "1" : document.querySelector("#sub" + i).value += "I"; break;
+							case "2" : document.querySelector("#sub" + i).value += "Z"; break;
+							case "4" : document.querySelector("#sub" + i).value += "A"; break;
+							case "7" : document.querySelector("#sub" + i).value += "YRT"; break;
+							case "9" : document.querySelector("#sub" + i).value += "G"; break;
+							case "8" : document.querySelector("#sub" + i).value += "B"; break;
+							case "3" : document.querySelector("#sub" + i).value += "E"; break;
+						}
+					}
+				}
+			}
+		})
+
+		btnValidate = document.querySelector("#btnValidate");
+		btnValidate.addEventListener("click", () => {
+			var letters = [];
+
+			if (inputNumberPlate.value.length < 6) {
+				alert("Number plate must be 6 characters");
+			} else {
+
+				for (var i=0; i<6; i++) {
+					if (document.querySelector("#char" + i).value.match(/^[a-zA-Z0-9]$/)) {
+						if (document.querySelector("#sub" + i).value.match(/^[a-zA-Z0-9]+$/)) {
+							var subs = document.querySelector("#sub" + i).value.split("").map((x) => x.toUpperCase());
+							letters.push([document.querySelector("#char" + i).value].concat(subs));
+						} else {
+							letters.push([document.querySelector("#char" + i).value]);
+						}
+					}
+				}
+
+				// letters = unique(letters);
+
+				output = cartesian(letters[0], letters[1], letters[2], letters[3], letters[4], letters[5]);
+				cheapOutput = output.filter((x) => x.join("").match(/^[A-z][A-z][0-9][0-9][A-z][A-z]|[A-z][A-z][0-9][0-9][0-9][0-9]|[A-z][A-z][A-z][0-9][0-9][0-9]|[A-z][A-z][A-z][0-9][0-9][A-z]|[0-9][0-9][A-z][A-z][A-z][A-z]|[0-9][0-9][0-9][A-z][A-z][A-z]|[N][A-z][A-z][0-9][0-9][0-9]|[N][A-z][A-z][0-9][0-9][A-z]$/))
+				console.log(output)
+				var resultDiv = document.querySelector("#result");
+				resultDiv.innerHTML = "Cheap plates (" + cheapOutput.length + "):<br/><ul>" + cheapOutput.map((x) => "<li>" + x.join("") + "</li>").join("") + "</ul><br/>All plates (" + output.length + "):<br/><ul>" + output.map((x) => "<li>" + x.join("") + "</li>").join("") + "</ul>";
+			}
+		})
+
+		btnClear = document.querySelector("#btnClear");
+		btnClear.addEventListener("click", () => {
+			for (var i=0; i<6; i++) {
+				document.querySelector("#char" + i).value = "";
+				document.querySelector("#sub" + i).value = "";
+			}
+			inputNumberPlate.value = "";
+			document.querySelector("#result").innerHTML = "";
+		});
+
+	</script>
+</body>
